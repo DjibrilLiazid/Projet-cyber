@@ -49,7 +49,7 @@ router.get('/', async (req, res) => {
     });
   } catch (err) {
     console.error('[SHOP] Erreur catalogue :', err);
-    res.status(500).render('error', { code: 500, message: 'Erreur serveur', user: req.session.username });
+    res.status(500).render('error', { title: 'Erreur 500', code: 500, message: 'Erreur serveur', user: req.session.username });
   }
 });
 
@@ -58,14 +58,14 @@ router.get('/product/:id', [
   param('id').isInt({ min: 1 }).withMessage('ID invalide'),
 ], async (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).render('error', { code: 400, message: 'Produit introuvable', user: req.session.username });
+  if (!errors.isEmpty()) return res.status(400).render('error', { title: 'Erreur 400', code: 400, message: 'Produit introuvable', user: req.session.username });
 
   try {
     const [rows] = await db.execute(
       'SELECT * FROM products WHERE id = ? AND is_active = 1',
       [req.params.id]
     );
-    if (!rows.length) return res.status(404).render('error', { code: 404, message: 'Produit introuvable', user: req.session.username });
+    if (!rows.length) return res.status(404).render('error', { title: 'Erreur 404', code: 404, message: 'Produit introuvable', user: req.session.username });
 
     res.render('shop/product', {
       title: rows[0].name,
@@ -74,7 +74,7 @@ router.get('/product/:id', [
     });
   } catch (err) {
     console.error('[SHOP] Erreur produit :', err);
-    res.status(500).render('error', { code: 500, message: 'Erreur serveur', user: req.session.username });
+    res.status(500).render('error', { title: 'Erreur 500', code: 500, message: 'Erreur serveur', user: req.session.username });
   }
 });
 
@@ -101,7 +101,7 @@ router.get('/cart', requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('[SHOP] Erreur panier :', err);
-    res.status(500).render('error', { code: 500, message: 'Erreur serveur', user: req.session.username });
+    res.status(500).render('error', { title: 'Erreur 500', code: 500, message: 'Erreur serveur', user: req.session.username });
   }
 });
 
@@ -140,7 +140,7 @@ router.post('/cart/add', requireAuth, [
     res.redirect('/shop/cart');
   } catch (err) {
     console.error('[SHOP] Erreur ajout panier :', err);
-    res.status(500).render('error', { code: 500, message: 'Erreur serveur', user: req.session.username });
+    res.status(500).render('error', { title: 'Erreur 500', code: 500, message: 'Erreur serveur', user: req.session.username });
   }
 });
 
@@ -212,7 +212,7 @@ router.post('/checkout', requireAuth, async (req, res) => {
     }
   } catch (err) {
     console.error('[SHOP] Erreur checkout :', err);
-    res.status(500).render('error', { code: 500, message: 'Erreur lors de la commande', user: req.session.username });
+    res.status(500).render('error', { title: 'Erreur 500', code: 500, message: 'Erreur lors de la commande', user: req.session.username });
   }
 });
 
@@ -227,7 +227,7 @@ router.get('/orders', requireAuth, async (req, res) => {
     res.render('shop/orders', { title: 'Mes Commandes', orders });
   } catch (err) {
     console.error('[SHOP] Erreur commandes :', err);
-    res.status(500).render('error', { code: 500, message: 'Erreur serveur', user: req.session.username });
+    res.status(500).render('error', { title: 'Erreur 500', code: 500, message: 'Erreur serveur', user: req.session.username });
   }
 });
 

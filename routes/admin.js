@@ -33,7 +33,7 @@ router.get('/', async (req, res) => {
     });
   } catch (err) {
     console.error('[ADMIN] Erreur dashboard :', err);
-    res.status(500).render('error', { code: 500, message: 'Erreur serveur', user: req.session.username });
+    res.status(500).render('error', { title: 'Erreur 500', code: 500, message: 'Erreur serveur', user: req.session.username });
   }
 });
 
@@ -46,7 +46,7 @@ router.get('/users', async (req, res) => {
     res.render('admin/users', { title: 'Gestion Utilisateurs', users, csrfToken: req.csrfToken() });
   } catch (err) {
     console.error('[ADMIN] Erreur users :', err);
-    res.status(500).render('error', { code: 500, message: 'Erreur serveur', user: req.session.username });
+    res.status(500).render('error', { title: 'Erreur 500', code: 500, message: 'Erreur serveur', user: req.session.username });
   }
 });
 
@@ -85,7 +85,7 @@ router.get('/products', async (req, res) => {
     res.render('admin/products', { title: 'Gestion Produits', products, csrfToken: req.csrfToken() });
   } catch (err) {
     console.error('[ADMIN] Erreur produits :', err);
-    res.status(500).render('error', { code: 500, message: 'Erreur serveur', user: req.session.username });
+    res.status(500).render('error', { title: 'Erreur 500', code: 500, message: 'Erreur serveur', user: req.session.username });
   }
 });
 
@@ -147,7 +147,7 @@ router.get('/orders', async (req, res) => {
     res.render('admin/orders', { title: 'Toutes les commandes', orders, csrfToken: req.csrfToken() });
   } catch (err) {
     console.error('[ADMIN] Erreur orders :', err);
-    res.status(500).render('error', { code: 500, message: 'Erreur serveur', user: req.session.username });
+    res.status(500).render('error', { title: 'Erreur 500', code: 500, message: 'Erreur serveur', user: req.session.username });
   }
 });
 

@@ -30,7 +30,7 @@ function requireAdmin(req, res, next) {
   // Vérification stricte du rôle côté serveur
   // On ne se fie JAMAIS à un cookie ou paramètre client pour le rôle
   if (req.session.role !== 'admin') {
-    return res.status(403).render('error', {
+    return res.status(403).render('error', { title: 'Erreur 403',
       code: 403,
       message: 'Accès interdit — droits administrateur requis.',
       user: req.session.username || null

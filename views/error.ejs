@@ -1,4 +1,4 @@
-<%- include('partials/header') %>
+<%- include('partials/header', { title: 'Erreur ' + code, csrfToken: typeof csrfToken !== 'undefined' ? csrfToken : '' }) %>
 
 <div class="text-center py-5">
   <div class="error-code"><%= code %></div>

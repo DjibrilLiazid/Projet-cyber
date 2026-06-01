@@ -123,6 +123,7 @@ app.use('/admin', adminRoutes);
 // ── 12. 404 ──────────────────────────────────────
 app.use((req, res) => {
   res.status(404).render('error', {
+    title: 'Erreur 404',
     code: 404,
     message: 'Page introuvable.',
     user: req.session.username || null
@@ -133,6 +134,7 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   if (err.code === 'EBADCSRFTOKEN') {
     return res.status(403).render('error', {
+      title: 'Erreur 403',
       code: 403,
       message: 'Requête invalide (CSRF).',
       user: req.session.username || null
@@ -140,6 +142,7 @@ app.use((err, req, res, next) => {
   }
   console.error('[ERROR]', err);
   res.status(500).render('error', {
+    title: 'Erreur 500',
     code: 500,
     message: 'Erreur interne du serveur.',
     user: req.session.username || null
