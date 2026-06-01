@@ -116,25 +116,36 @@ router.post('/cart/add', requireAuth, [
     return res.redirect('/shop');
   }
 
-  const { product_id, quantity } = req.body;
+  const productId = parseInt(req.body.product_id, 10);
+  const quantity  = parseInt(req.body.quantity, 10);
 
   try {
-    // Vérifier que le produit existe et est disponible
-    const [prod] = await db.execute(
+    const [prodRows] = await db.execute(
       'SELECT id, stock FROM products WHERE id = ? AND is_active = 1',
-      [product_id]
+      [productId]
     );
-    if (!prod.length) {
+    if (!prodRows.length) {
       req.flash('error', 'Produit introuvable.');
       return res.redirect('/shop');
     }
 
-    // INSERT ou UPDATE si déjà dans le panier
+    const product = prodRows[0];
+    const [cartRows] = await db.execute(
+      'SELECT quantity FROM cart_items WHERE user_id = ? AND product_id = ?',
+      [req.session.userId, productId]
+    );
+    const existingQuantity = cartRows.length ? cartRows[0].quantity : 0;
+
+    if (existingQuantity + quantity > product.stock) {
+      req.flash('error', `Stock insuffisant. Il ne reste que ${product.stock - existingQuantity} article(s) disponible(s).`);
+      return res.redirect('/shop/product/' + productId);
+    }
+
     await db.execute(`
       INSERT INTO cart_items (user_id, product_id, quantity)
       VALUES (?, ?, ?)
       ON CONFLICT(user_id, product_id) DO UPDATE SET quantity = cart_items.quantity + excluded.quantity
-    `, [req.session.userId, product_id, parseInt(quantity)]);
+    `, [req.session.userId, productId, quantity]);
 
     req.flash('success', 'Article ajouté au panier !');
     res.redirect('/shop/cart');
@@ -180,9 +191,15 @@ router.post('/checkout', requireAuth, async (req, res) => {
       return res.redirect('/shop/cart');
     }
 
+    const outOfStock = items.filter(item => item.quantity > item.stock);
+    if (outOfStock.length) {
+      const productNames = outOfStock.map(i => i.product_id).join(', ');
+      req.flash('error', 'Stock insuffisant sur certains articles. Veuillez vérifier votre panier.');
+      return res.redirect('/shop/cart');
+    }
+
     const total = items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
 
-    // Transaction pour garantir la cohérence (commande + vidage panier)
     const conn = await require('../config/db').getConnection();
     await conn.beginTransaction();
     try {
@@ -193,6 +210,14 @@ router.post('/checkout', requireAuth, async (req, res) => {
       const orderId = orderResult.insertId;
 
       for (const item of items) {
+        const [updateResult] = await conn.execute(
+          'UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?',
+          [item.quantity, item.product_id, item.quantity]
+        );
+        if (updateResult.affectedRows === 0) {
+          throw new Error(`Stock insuffisant pour le produit ${item.product_id}`);
+        }
+
         await conn.execute(
           'INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)',
           [orderId, item.product_id, item.quantity, item.price]
@@ -212,7 +237,8 @@ router.post('/checkout', requireAuth, async (req, res) => {
     }
   } catch (err) {
     console.error('[SHOP] Erreur checkout :', err);
-    res.status(500).render('error', { title: 'Erreur 500', code: 500, message: 'Erreur lors de la commande', user: req.session.username });
+    req.flash('error', 'Erreur lors de la commande. Veuillez réessayer.');
+    res.redirect('/shop/cart');
   }
 });
 

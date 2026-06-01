@@ -13,6 +13,14 @@ const flash      = require('connect-flash');
 const rateLimit  = require('express-rate-limit');
 const path       = require('path');
 
+const PORT = process.env.PORT || 3001;
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-secure-shop';
+
+if (!process.env.SESSION_SECRET) {
+  console.warn('[WARNING] SESSION_SECRET non défini. Utilisation d\'une clé de développement par défaut. Ne pas utiliser en production.');
+}
+
 const authRoutes  = require('./routes/auth');
 const shopRoutes  = require('./routes/shop');
 const adminRoutes = require('./routes/admin');
@@ -78,12 +86,12 @@ app.set('views', path.join(__dirname, 'views'));
 // OWASP A07 - Authentication Failures
 app.use(session({
   name: 'secureshop.sid',        // Nom personnalisé (pas 'connect.sid' par défaut)
-  secret: process.env.SESSION_SECRET,
+  secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,              // Inaccessible via JavaScript (anti-XSS)
-    secure: process.env.NODE_ENV === 'production',  // HTTPS only en prod
+    secure: NODE_ENV === 'production',  // HTTPS only en prod
     sameSite: 'strict',          // Anti-CSRF supplémentaire
     maxAge: 2 * 60 * 60 * 1000  // 2 heures
   }
@@ -97,6 +105,12 @@ app.use(flash());
 // Chaque formulaire POST doit inclure un token CSRF valide
 // généré côté serveur et vérifié à chaque soumission
 app.use(csrf());
+
+// Injecter le token CSRF dans toutes les vues EJS
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
 
 // Gestion des erreurs CSRF (token invalide ou absent)
 app.use((err, req, res, next) => {
@@ -150,10 +164,9 @@ app.use((err, req, res, next) => {
 });
 
 // ── Démarrage ────────────────────────────────────
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`\n🔐 SecureShop démarré sur http://localhost:${PORT}`);
-  console.log(`   Environnement : ${process.env.NODE_ENV || 'development'}`);
+  console.log(`   Environnement : ${NODE_ENV}`);
   console.log(`   Admin         : /admin`);
   console.log(`   Boutique      : /shop\n`);
 });

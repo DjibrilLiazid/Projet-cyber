@@ -57,8 +57,8 @@ CREATE TABLE IF NOT EXISTS cart_items (
 -- Données de test
 -- admin : Admin1234!  |  alice : User1234!
 INSERT OR IGNORE INTO users (username, email, password_hash, role) VALUES
-('admin', 'admin@secureshop.fr', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBpj2T4HFQZ3S2', 'admin'),
-('alice',  'alice@example.fr',   '$2b$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',  'user');
+('admin', 'admin@secureshop.fr', '$2b$12$ljPEJ6K1VEJXN86UOm9JGOkuYbAYofkrXCCwfNW1z0qYyIxc53fTC', 'admin'),
+('alice',  'alice@example.fr',   '$2b$12$F1TsWZ4vf8fIpMoIFjz.zeu1HfQKDJEAbVXEmY88lKtRx7cBO5s9.',  'user');
 
 INSERT OR IGNORE INTO products (name, description, price, stock, category) VALUES
 ('Casque Audio Premium', 'Casque sans fil avec réduction de bruit active, autonomie 30h', 149.99, 15, 'Audio'),

@@ -3,6 +3,7 @@
 // Aucune configuration requise, le fichier .db est créé automatiquement
 
 const sqlite3 = require('sqlite3').verbose();
+const bcrypt  = require('bcrypt');
 const path    = require('path');
 const fs      = require('fs');
 
@@ -15,15 +16,57 @@ const db      = new sqlite3.Database(DB_PATH, (err) => {
 db.run('PRAGMA foreign_keys = ON');
 db.run('PRAGMA journal_mode = WAL');
 
+const dbGet = (sql, params = []) => new Promise((resolve, reject) => {
+  db.get(sql, params, (err, row) => err ? reject(err) : resolve(row));
+});
+
+const dbRun = (sql, params = []) => new Promise((resolve, reject) => {
+  db.run(sql, params, function(err) {
+    if (err) return reject(err);
+    resolve(this);
+  });
+});
+
+async function ensureDefaultUsers() {
+  const defaultUsers = [
+    { username: 'admin', email: 'admin@secureshop.fr', password: 'Admin1234!', role: 'admin' },
+    { username: 'alice', email: 'alice@example.fr', password: 'User1234!', role: 'user' }
+  ];
+
+  for (const user of defaultUsers) {
+    const passwordHash = await bcrypt.hash(user.password, 12);
+    const existing = await dbGet('SELECT id FROM users WHERE email = ?', [user.email]);
+
+    if (existing) {
+      await dbRun(
+        'UPDATE users SET username = ?, password_hash = ?, role = ?, is_active = 1 WHERE email = ?',
+        [user.username, passwordHash, user.role, user.email]
+      );
+    } else {
+      await dbRun(
+        'INSERT INTO users (username, email, password_hash, role, is_active) VALUES (?, ?, ?, ?, 1)',
+        [user.username, user.email, passwordHash, user.role]
+      );
+    }
+  }
+}
+
 // Initialisation du schéma au premier lancement
 const schemaPath = path.join(__dirname, '..', 'db', 'schema.sql');
 const schema = fs.readFileSync(schemaPath, 'utf8');
 const statements = schema.split(';').map(s => s.trim()).filter(s => s.length > 0);
-statements.forEach(stmt => {
-  db.run(stmt, err => {
-    if (err && !err.message.includes('already exists') && !err.message.includes('UNIQUE')) {
-      // Silently ignore seed duplicates
-    }
+
+db.serialize(() => {
+  statements.forEach(stmt => {
+    db.run(stmt, err => {
+      if (err && !err.message.includes('already exists') && !err.message.includes('UNIQUE')) {
+        // Silently ignore seed duplicates
+      }
+    });
+  });
+
+  ensureDefaultUsers().catch(err => {
+    console.error('[DB] Impossible de créer les utilisateurs par défaut :', err);
   });
 });
 
