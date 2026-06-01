@@ -1,0 +1,12 @@
+<%- include('partials/header') %>
+
+<div class="text-center py-5">
+  <div class="error-code"><%= code %></div>
+  <h2 class="mb-3"><%= message %></h2>
+  <a href="/shop" class="btn btn-primary me-2">← Retour à la boutique</a>
+  <% if (!currentUser) { %>
+    <a href="/auth/login" class="btn btn-outline-secondary">Se connecter</a>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

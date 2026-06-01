@@ -1,0 +1,55 @@
+<%- include('../partials/header') %>
+
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <div class="card auth-card">
+      <div class="card-body p-4">
+        <h2 class="card-title mb-1">Connexion</h2>
+        <p class="text-muted mb-4">Accédez à votre compte SecureShop</p>
+
+        <form action="/auth/login" method="POST" autocomplete="off">
+          <!-- Token CSRF — protection contre les attaques Cross-Site Request Forgery -->
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email"
+                   required autocomplete="email" placeholder="vous@exemple.fr">
+          </div>
+
+          <div class="mb-4">
+            <label for="password" class="form-label">Mot de passe</label>
+            <input type="password" class="form-control" id="password" name="password"
+                   required autocomplete="current-password" placeholder="••••••••">
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+        </form>
+
+        <hr class="my-4">
+        <p class="text-center mb-0">
+          Pas encore de compte ? <a href="/auth/register">Créer un compte</a>
+        </p>
+
+        <!-- Comptes de démo -->
+        <div class="demo-box mt-4">
+          <p class="small mb-2"><strong>Comptes de démonstration :</strong></p>
+          <div class="row">
+            <div class="col-6">
+              <code class="small">admin@secureshop.fr</code><br>
+              <code class="small">Admin1234!</code>
+              <span class="badge bg-warning text-dark ms-1">admin</span>
+            </div>
+            <div class="col-6">
+              <code class="small">alice@example.fr</code><br>
+              <code class="small">User1234!</code>
+              <span class="badge bg-secondary ms-1">user</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

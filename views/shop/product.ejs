@@ -1,0 +1,53 @@
+<%- include('../partials/header') %>
+
+<div class="row">
+  <div class="col-md-5">
+    <div class="product-detail-img">
+      <% if (product.category === 'Audio') { %>🎧
+      <% } else if (product.category === 'Gaming') { %>🎮
+      <% } else if (product.category === 'Streaming') { %>📹
+      <% } else if (product.category === 'Stockage') { %>💾
+      <% } else { %>📦<% } %>
+    </div>
+  </div>
+  <div class="col-md-7">
+    <span class="badge badge-category mb-2"><%= product.category %></span>
+    <h1 class="product-detail-title"><%= product.name %></h1>
+    <p class="text-muted"><%= product.description %></p>
+
+    <div class="product-detail-price"><%= product.price.toFixed(2) %> €</div>
+
+    <% if (product.stock > 0) { %>
+      <p class="text-success mb-3">✅ En stock (<%= product.stock %> disponibles)</p>
+    <% } else { %>
+      <p class="text-danger mb-3">❌ Rupture de stock</p>
+    <% } %>
+
+    <% if (currentUser && product.stock > 0) { %>
+      <form action="/shop/cart/add" method="POST">
+        <!-- Token CSRF obligatoire sur tous les formulaires POST -->
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="product_id" value="<%= product.id %>">
+
+        <div class="d-flex gap-3 align-items-center">
+          <div style="width: 100px">
+            <input type="number" class="form-control" name="quantity"
+                   value="1" min="1" max="99">
+          </div>
+          <button type="submit" class="btn btn-primary flex-grow-1">
+            🛒 Ajouter au panier
+          </button>
+        </div>
+      </form>
+    <% } else if (!currentUser) { %>
+      <a href="/auth/login" class="btn btn-outline-primary">
+        Connectez-vous pour acheter
+      </a>
+    <% } %>
+
+    <hr class="my-4">
+    <a href="/shop" class="btn btn-outline-secondary">← Retour au catalogue</a>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title><%= title %> — SecureShop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="/shop">
+      <span class="brand-lock">🔐</span> SecureShop
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="/shop">Catalogue</a></li>
+        <% if (currentUser) { %>
+          <li class="nav-item"><a class="nav-link" href="/shop/orders">Mes commandes</a></li>
+          <% if (isAdmin) { %>
+            <li class="nav-item"><a class="nav-link text-warning" href="/admin">⚙️ Admin</a></li>
+          <% } %>
+        <% } %>
+      </ul>
+      <ul class="navbar-nav ms-auto align-items-center">
+        <% if (currentUser) { %>
+          <li class="nav-item me-2">
+            <a class="nav-link" href="/shop/cart">
+              🛒 Panier
+            </a>
+          </li>
+          <li class="nav-item me-3">
+            <span class="nav-text">👤 <%= currentUser.username %></span>
+          </li>
+          <li class="nav-item">
+            <form action="/auth/logout" method="POST" class="d-inline">
+              <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+              <button type="submit" class="btn btn-sm btn-outline-light">Déconnexion</button>
+            </form>
+          </li>
+        <% } else { %>
+          <li class="nav-item me-2"><a class="nav-link" href="/auth/login">Connexion</a></li>
+          <li class="nav-item"><a class="btn btn-primary btn-sm" href="/auth/register">S'inscrire</a></li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <!-- Flash messages -->
+  <% if (flashSuccess && flashSuccess.length > 0) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <%= flashSuccess[0] %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  <% } %>
+  <% if (flashError && flashError.length > 0) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <%= flashError[0] %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  <% } %>

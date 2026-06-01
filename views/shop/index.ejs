@@ -1,0 +1,64 @@
+<%- include('../partials/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="page-title">Catalogue</h1>
+  <% if (currentUser) { %>
+    <a href="/shop/cart" class="btn btn-outline-primary">🛒 Mon panier</a>
+  <% } %>
+</div>
+
+<!-- Filtres catégories -->
+<div class="category-filters mb-4">
+  <a href="/shop" class="btn btn-sm <%= !currentCategory ? 'btn-primary' : 'btn-outline-secondary' %> me-2">
+    Tous
+  </a>
+  <% categories.forEach(cat => { %>
+    <a href="/shop?category=<%= encodeURIComponent(cat) %>"
+       class="btn btn-sm <%= currentCategory === cat ? 'btn-primary' : 'btn-outline-secondary' %> me-2">
+      <%= cat %>
+    </a>
+  <% }) %>
+</div>
+
+<!-- Grille produits -->
+<div class="row row-cols-1 row-cols-md-3 g-4">
+  <% products.forEach(product => { %>
+    <div class="col">
+      <div class="card product-card h-100">
+        <div class="product-img-wrapper">
+          <div class="product-img-placeholder">
+            <% if (product.category === 'Audio') { %>🎧
+            <% } else if (product.category === 'Gaming') { %>🎮
+            <% } else if (product.category === 'Streaming') { %>📹
+            <% } else if (product.category === 'Stockage') { %>💾
+            <% } else { %>📦<% } %>
+          </div>
+        </div>
+        <div class="card-body d-flex flex-column">
+          <span class="badge badge-category mb-2"><%= product.category %></span>
+          <!-- EJS échappe automatiquement le HTML — protection XSS -->
+          <h5 class="card-title"><%= product.name %></h5>
+          <p class="card-text text-muted small flex-grow-1"><%= product.description %></p>
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <span class="product-price"><%= product.price.toFixed(2) %> €</span>
+            <% if (product.stock > 0) { %>
+              <span class="stock-badge in-stock">En stock (<%= product.stock %>)</span>
+            <% } else { %>
+              <span class="stock-badge out-of-stock">Rupture</span>
+            <% } %>
+          </div>
+          <a href="/shop/product/<%= product.id %>" class="btn btn-primary mt-3">Voir le produit</a>
+        </div>
+      </div>
+    </div>
+  <% }) %>
+</div>
+
+<% if (products.length === 0) { %>
+  <div class="text-center py-5">
+    <p class="text-muted">Aucun produit dans cette catégorie.</p>
+    <a href="/shop" class="btn btn-outline-primary">Voir tout le catalogue</a>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

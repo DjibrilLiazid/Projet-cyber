@@ -1,0 +1,94 @@
+<%- include('../partials/header') %>
+
+<div class="d-flex align-items-center mb-4 gap-3">
+  <h1 class="page-title mb-0">⚙️ Administration</h1>
+  <span class="badge bg-warning text-dark">Espace protégé — Admin uniquement</span>
+</div>
+
+<!-- Stats -->
+<div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+  <div class="col">
+    <div class="card stat-card text-center p-3">
+      <div class="stat-icon">👤</div>
+      <div class="stat-number"><%= stats.userCount %></div>
+      <div class="stat-label">Utilisateurs</div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card stat-card text-center p-3">
+      <div class="stat-icon">📦</div>
+      <div class="stat-number"><%= stats.productCount %></div>
+      <div class="stat-label">Produits</div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card stat-card text-center p-3">
+      <div class="stat-icon">🛒</div>
+      <div class="stat-number"><%= stats.orderCount %></div>
+      <div class="stat-label">Commandes</div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card stat-card text-center p-3">
+      <div class="stat-icon">💰</div>
+      <div class="stat-number"><%= stats.revenue %> €</div>
+      <div class="stat-label">Revenus</div>
+    </div>
+  </div>
+</div>
+
+<!-- Navigation admin -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <a href="/admin/users" class="card admin-nav-card text-decoration-none">
+      <div class="card-body text-center py-4">
+        <div style="font-size:2rem">👥</div>
+        <h5 class="mt-2 mb-0">Utilisateurs</h5>
+        <small class="text-muted">Gérer les comptes</small>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="/admin/products" class="card admin-nav-card text-decoration-none">
+      <div class="card-body text-center py-4">
+        <div style="font-size:2rem">📦</div>
+        <h5 class="mt-2 mb-0">Produits</h5>
+        <small class="text-muted">Ajouter / désactiver</small>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="/admin/orders" class="card admin-nav-card text-decoration-none">
+      <div class="card-body text-center py-4">
+        <div style="font-size:2rem">🛒</div>
+        <h5 class="mt-2 mb-0">Commandes</h5>
+        <small class="text-muted">Voir toutes les commandes</small>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- Dernières commandes -->
+<div class="card">
+  <div class="card-header"><strong>Dernières commandes</strong></div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>#</th><th>Client</th><th>Total</th><th>Statut</th><th>Date</th></tr>
+      </thead>
+      <tbody>
+        <% recentOrders.forEach(o => { %>
+          <tr>
+            <td>#<%= o.id %></td>
+            <td><%= o.username %></td>
+            <td><%= parseFloat(o.total).toFixed(2) %> €</td>
+            <td><span class="badge bg-<%= o.status === 'paid' ? 'success' : 'warning' %>"><%= o.status %></span></td>
+            <td><%= new Date(o.created_at).toLocaleDateString('fr-FR') %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

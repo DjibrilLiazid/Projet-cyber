@@ -1,0 +1,48 @@
+<%- include('../partials/header') %>
+
+<h1 class="page-title mb-4">📦 Mes Commandes</h1>
+
+<% if (orders.length === 0) { %>
+  <div class="text-center py-5">
+    <div style="font-size: 4rem">📦</div>
+    <p class="text-muted mt-3">Vous n'avez pas encore de commande.</p>
+    <a href="/shop" class="btn btn-primary">Découvrir le catalogue</a>
+  </div>
+<% } else { %>
+  <div class="card">
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>N° Commande</th>
+            <th>Date</th>
+            <th>Total</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% orders.forEach(order => { %>
+            <tr>
+              <td><strong>#<%= order.id %></strong></td>
+              <td><%= new Date(order.created_at).toLocaleDateString('fr-FR') %></td>
+              <td><%= parseFloat(order.total).toFixed(2) %> €</td>
+              <td>
+                <% if (order.status === 'paid') { %>
+                  <span class="badge bg-success">✅ Payée</span>
+                <% } else if (order.status === 'shipped') { %>
+                  <span class="badge bg-info">🚚 Expédiée</span>
+                <% } else if (order.status === 'cancelled') { %>
+                  <span class="badge bg-danger">❌ Annulée</span>
+                <% } else { %>
+                  <span class="badge bg-warning text-dark">⏳ En attente</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

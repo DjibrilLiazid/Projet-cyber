@@ -1,0 +1,79 @@
+<%- include('../partials/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="page-title">📦 Gestion Produits</h1>
+  <a href="/admin" class="btn btn-outline-secondary">← Dashboard</a>
+</div>
+
+<!-- Formulaire ajout produit -->
+<div class="card mb-4">
+  <div class="card-header"><strong>➕ Ajouter un produit</strong></div>
+  <div class="card-body">
+    <form action="/admin/products/add" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Nom</label>
+          <input type="text" class="form-control" name="name" required minlength="2" maxlength="255">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Catégorie</label>
+          <input type="text" class="form-control" name="category" required maxlength="100">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Prix (€)</label>
+          <input type="number" class="form-control" name="price" step="0.01" min="0.01" required>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Stock</label>
+          <input type="number" class="form-control" name="stock" min="0" value="0" required>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" name="description" rows="2" maxlength="2000"></textarea>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">Ajouter le produit</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Liste produits -->
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>ID</th><th>Nom</th><th>Catégorie</th><th>Prix</th><th>Stock</th><th>Statut</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        <% products.forEach(p => { %>
+          <tr class="<%= !p.is_active ? 'table-secondary' : '' %>">
+            <td><%= p.id %></td>
+            <td><strong><%= p.name %></strong></td>
+            <td><%= p.category %></td>
+            <td><%= parseFloat(p.price).toFixed(2) %> €</td>
+            <td><%= p.stock %></td>
+            <td>
+              <span class="badge bg-<%= p.is_active ? 'success' : 'danger' %>">
+                <%= p.is_active ? 'Actif' : 'Désactivé' %>
+              </span>
+            </td>
+            <td>
+              <% if (p.is_active) { %>
+                <form action="/admin/products/<%= p.id %>/delete" method="POST" class="d-inline"
+                      onsubmit="return confirm('Désactiver ce produit ?')">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Désactiver</button>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
