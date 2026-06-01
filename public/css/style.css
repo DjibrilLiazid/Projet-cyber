@@ -4,46 +4,70 @@
    ================================================ */
 
 :root {
-  --bg:         #0d0f14;
-  --surface:    #161b27;
-  --surface2:   #1e2638;
-  --border:     #2a3450;
-  --primary:    #4f8ef7;
-  --primary-h:  #3a73d9;
-  --accent:     #00e5a0;
+  --bg:         #05070f;
+  --surface:    #101525;
+  --surface2:   #17203a;
+  --border:     rgba(57,245,206,.18);
+  --primary:    #39ffc2;
+  --primary-h:  #2bd6aa;
+  --accent:     #ff2fb8;
   --danger:     #ff4d6d;
   --warning:    #ffd166;
-  --text:       #e2e8f0;
-  --text-muted: #8892a4;
+  --text:       #e8f8ff;
+  --text-muted: #8a95aa;
   --font-main:  'DM Sans', sans-serif;
   --font-mono:  'Space Mono', monospace;
-  --radius:     12px;
+  --radius:     14px;
 }
 
 * { box-sizing: border-box; }
 
+html { min-height: 100%; }
 body {
-  background-color: var(--bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: radial-gradient(circle at top left, rgba(57,255,194,.15), transparent 28%),
+              radial-gradient(circle at bottom right, rgba(255,47,184,.12), transparent 25%),
+              linear-gradient(180deg, #08101d 0%, #05070f 100%);
   color: var(--text);
   font-family: var(--font-main);
   font-size: 15px;
   line-height: 1.65;
-  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
 }
 
 /* ── NAVBAR ── */
 .navbar {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: rgba(16,22,37,.95);
+  border-bottom: 1px solid rgba(57,255,194,.12);
   padding: 1rem 0;
+  box-shadow: 0 0 30px rgba(57,255,194,.08);
 }
 
 .navbar-brand {
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   color: var(--primary) !important;
   letter-spacing: -0.5px;
+  text-shadow: 0 0 12px rgba(57,255,194,.35);
+}
+
+.navbar-nav .nav-link {
+  color: rgba(232,248,255,.85);
+  transition: color .2s ease-in-out;
+}
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+  color: var(--primary) !important;
+}
+
+.nav-text {
+  color: rgba(232,248,255,.8);
 }
 
 .brand-lock { margin-right: 6px; }
@@ -58,15 +82,16 @@ body {
 
 /* ── CARDS ── */
 .card {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: rgba(16,24,46,.95);
+  border: 1px solid rgba(57,255,194,.12);
   border-radius: var(--radius);
   color: var(--text);
+  box-shadow: 0 12px 30px rgba(0,0,0,.25);
 }
 
 .card-header {
-  background: var(--surface2);
-  border-bottom: 1px solid var(--border);
+  background: rgba(10,16,32,.94);
+  border-bottom: 1px solid rgba(57,255,194,.16);
   border-radius: var(--radius) var(--radius) 0 0;
   padding: .75rem 1.25rem;
   color: var(--text);
@@ -104,15 +129,16 @@ body {
 
 /* ── BUTTONS ── */
 .btn-primary {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #fff;
-  font-weight: 600;
+  background: linear-gradient(135deg, var(--primary), rgba(57,255,194,.9));
+  border-color: rgba(57,255,194,.35);
+  color: #020617;
+  font-weight: 700;
   border-radius: 8px;
-  transition: background .2s, transform .1s;
+  transition: transform .1s, box-shadow .2s, background .2s;
+  box-shadow: 0 0 18px rgba(57,255,194,.25);
 }
 .btn-primary:hover {
-  background: var(--primary-h);
+  background: linear-gradient(135deg, var(--primary-h), rgba(57,255,194,.95));
   border-color: var(--primary-h);
   transform: translateY(-1px);
 }
@@ -123,10 +149,10 @@ body {
 }
 .btn-outline-primary:hover {
   background: var(--primary);
-  color: #fff;
+  color: #020617;
 }
 .btn-outline-secondary {
-  border-color: var(--border);
+  border-color: rgba(255,255,255,.12);
   color: var(--text-muted);
   border-radius: 8px;
 }
@@ -281,11 +307,17 @@ body {
 
 /* ── FOOTER ── */
 .footer {
-  background: var(--surface);
-  border-top: 1px solid var(--border);
+  background: rgba(10,16,32,.98);
+  border-top: 1px solid rgba(57,255,194,.12);
   padding: 1.5rem 0;
   color: var(--text-muted);
   font-size: .85rem;
+  margin-top: auto;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+}
+.footer p,
+.footer small {
+  color: var(--text-muted);
 }
 
 /* ── CATEGORIES FILTER ── */
