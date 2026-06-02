@@ -2,3 +2,14 @@ node_modules/
 .env
 *.log
 .DS_Store
+\n+# Python/DB/IDE
+*.db
+*.sqlite3
+__pycache__/
+.vscode/
+venv/
+.pytest_cache/
+
+# keep specific DB name as well (optional)
+secureshop.db
+
