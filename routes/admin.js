@@ -1,9 +1,3 @@
-// routes/admin.js
-// ================================================
-// OWASP A01 - Broken Access Control
-// Toutes les routes ici sont protégées par requireAdmin
-// Seul un admin authentifié côté serveur peut y accéder
-// ================================================
 
 const express = require('express');
 const { body, param, validationResult } = require('express-validator');
@@ -18,11 +12,11 @@ router.use(requireAdmin);
 // ── GET /admin — Dashboard ───────────────────────
 router.get('/', async (req, res) => {
   try {
-    const [[{ userCount }]]    = await db.execute('SELECT COUNT(*) as userCount FROM users');
+    const [[{ userCount }]] = await db.execute('SELECT COUNT(*) as userCount FROM users');
     const [[{ productCount }]] = await db.execute('SELECT COUNT(*) as productCount FROM products');
-    const [[{ orderCount }]]   = await db.execute('SELECT COUNT(*) as orderCount FROM orders');
-    const [[{ revenue }]]      = await db.execute("SELECT COALESCE(SUM(total), 0) as revenue FROM orders WHERE status = 'paid'");
-    const [recentOrders]       = await db.execute(
+    const [[{ orderCount }]] = await db.execute('SELECT COUNT(*) as orderCount FROM orders');
+    const [[{ revenue }]] = await db.execute("SELECT COALESCE(SUM(total), 0) as revenue FROM orders WHERE status = 'paid'");
+    const [recentOrders] = await db.execute(
       'SELECT o.*, u.username FROM orders o JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC LIMIT 5'
     );
 
@@ -37,7 +31,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ── GET /admin/users — Liste utilisateurs ────────
+
 router.get('/users', async (req, res) => {
   try {
     const [users] = await db.execute(
@@ -50,7 +44,7 @@ router.get('/users', async (req, res) => {
   }
 });
 
-// ── POST /admin/users/:id/toggle — Activer/désactiver ──
+
 router.post('/users/:id/toggle', [
   param('id').isInt({ min: 1 }),
 ], async (req, res) => {
@@ -78,7 +72,6 @@ router.post('/users/:id/toggle', [
   }
 });
 
-// ── GET /admin/products — Liste produits ─────────
 router.get('/products', async (req, res) => {
   try {
     const [products] = await db.execute('SELECT * FROM products ORDER BY created_at DESC');
@@ -89,7 +82,6 @@ router.get('/products', async (req, res) => {
   }
 });
 
-// ── POST /admin/products/add — Ajouter un produit ─
 router.post('/products/add', [
   body('name').trim().isLength({ min: 2, max: 255 }).escape(),
   body('description').trim().isLength({ max: 2000 }).escape(),
@@ -118,7 +110,6 @@ router.post('/products/add', [
   }
 });
 
-// ── POST /admin/products/:id/delete — Supprimer ──
 router.post('/products/:id/delete', [
   param('id').isInt({ min: 1 }),
 ], async (req, res) => {
@@ -136,7 +127,6 @@ router.post('/products/:id/delete', [
   }
 });
 
-// ── GET /admin/orders — Toutes les commandes ─────
 router.get('/orders', async (req, res) => {
   try {
     const [orders] = await db.execute(`

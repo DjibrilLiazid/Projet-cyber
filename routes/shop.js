@@ -1,31 +1,24 @@
-// routes/shop.js
-// ================================================
-// OWASP A03 - Injection       → requêtes préparées partout
-// OWASP A01 - Access Control  → panier lié à l'user connecté uniquement
-// OWASP A05 - Misconfiguration→ IDs validés avant toute requête
-// ================================================
 
 const express = require('express');
 const { body, param, validationResult } = require('express-validator');
-const db      = require('../config/db');
+const db = require('../config/db');
 const { requireAuth } = require('../middleware/auth');
-const router  = express.Router();
+const router = express.Router();
 
-// ── GET /shop — Catalogue ────────────────────────
 router.get('/', async (req, res) => {
   try {
     const category = req.query.category || null;
-    let query  = 'SELECT * FROM products WHERE is_active = 1';
+    let query = 'SELECT * FROM products WHERE is_active = 1';
     let params = [];
 
     if (category) {
       // Paramètre préparé — jamais de concaténation dans la requête
-      query  += ' AND category = ?';
+      query += ' AND category = ?';
       params.push(category);
     }
     query += ' ORDER BY created_at DESC';
 
-    const [products]   = await db.execute(query, params);
+    const [products] = await db.execute(query, params);
     const [categories] = await db.execute(
       'SELECT DISTINCT category FROM products WHERE is_active = 1'
     );
@@ -53,7 +46,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ── GET /shop/product/:id — Détail produit ───────
 router.get('/product/:id', [
   param('id').isInt({ min: 1 }).withMessage('ID invalide'),
 ], async (req, res) => {
@@ -78,11 +70,9 @@ router.get('/product/:id', [
   }
 });
 
-// ── GET /shop/cart — Panier ──────────────────────
 router.get('/cart', requireAuth, async (req, res) => {
   try {
-    // Jointure pour récupérer les infos produits
-    // user_id = req.session.userId — l'utilisateur ne peut voir que SON panier
+
     const [items] = await db.execute(`
       SELECT ci.id, ci.quantity, p.id as product_id, p.name, p.price, p.image_url
       FROM cart_items ci
@@ -105,7 +95,6 @@ router.get('/cart', requireAuth, async (req, res) => {
   }
 });
 
-// ── POST /shop/cart/add — Ajouter au panier ──────
 router.post('/cart/add', requireAuth, [
   body('product_id').isInt({ min: 1 }).withMessage('Produit invalide'),
   body('quantity').isInt({ min: 1, max: 99 }).withMessage('Quantité invalide'),
@@ -117,7 +106,7 @@ router.post('/cart/add', requireAuth, [
   }
 
   const productId = parseInt(req.body.product_id, 10);
-  const quantity  = parseInt(req.body.quantity, 10);
+  const quantity = parseInt(req.body.quantity, 10);
 
   try {
     const [prodRows] = await db.execute(
@@ -155,7 +144,6 @@ router.post('/cart/add', requireAuth, [
   }
 });
 
-// ── POST /shop/cart/remove — Retirer du panier ───
 router.post('/cart/remove', requireAuth, [
   body('item_id').isInt({ min: 1 }),
 ], async (req, res) => {
@@ -163,8 +151,7 @@ router.post('/cart/remove', requireAuth, [
   if (!errors.isEmpty()) return res.redirect('/shop/cart');
 
   try {
-    // WHERE user_id = req.session.userId → un utilisateur ne peut supprimer
-    // QUE ses propres articles (protection IDOR)
+
     await db.execute(
       'DELETE FROM cart_items WHERE id = ? AND user_id = ?',
       [req.body.item_id, req.session.userId]
@@ -177,7 +164,6 @@ router.post('/cart/remove', requireAuth, [
   }
 });
 
-// ── POST /shop/checkout — Passer commande ────────
 router.post('/checkout', requireAuth, async (req, res) => {
   try {
     const [items] = await db.execute(`
@@ -242,7 +228,6 @@ router.post('/checkout', requireAuth, async (req, res) => {
   }
 });
 
-// ── GET /shop/orders — Mes commandes ─────────────
 router.get('/orders', requireAuth, async (req, res) => {
   try {
     // L'utilisateur ne voit QUE ses propres commandes

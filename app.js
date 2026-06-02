@@ -1,17 +1,13 @@
-// app.js
-// ================================================
-// OWASP Top 10 — Configuration sécurisée de l'application
-// ================================================
 
 require('dotenv').config();
-const express    = require('express');
-const session    = require('express-session');
-const helmet     = require('helmet');
-const morgan     = require('morgan');
-const csrf       = require('csurf');
-const flash      = require('connect-flash');
-const rateLimit  = require('express-rate-limit');
-const path       = require('path');
+const express = require('express');
+const session = require('express-session');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const csrf = require('csurf');
+const flash = require('connect-flash');
+const rateLimit = require('express-rate-limit');
+const path = require('path');
 
 const PORT = process.env.PORT || 3001;
 const NODE_ENV = process.env.NODE_ENV || 'development';
@@ -21,30 +17,23 @@ if (!process.env.SESSION_SECRET) {
   console.warn('[WARNING] SESSION_SECRET non défini. Utilisation d\'une clé de développement par défaut. Ne pas utiliser en production.');
 }
 
-const authRoutes  = require('./routes/auth');
-const shopRoutes  = require('./routes/shop');
+const authRoutes = require('./routes/auth');
+const shopRoutes = require('./routes/shop');
 const adminRoutes = require('./routes/admin');
 const { injectUser } = require('./middleware/auth');
 
 const app = express();
 
-// ── 1. HELMET — Headers de sécurité HTTP ────────
-// OWASP A05 - Security Misconfiguration
-// Helmet configure automatiquement :
-//   X-Frame-Options (anti-clickjacking)
-//   X-Content-Type-Options (anti-MIME sniffing)
-//   Referrer-Policy
-//   Content-Security-Policy (CSP) — anti-XSS
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc:  ["'self'", "https://cdn.jsdelivr.net"],
-      styleSrc:   ["'self'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com", "'unsafe-inline'"],
-      fontSrc:    ["'self'", "https://fonts.gstatic.com"],
-      imgSrc:     ["'self'", "data:"],
+      scriptSrc: ["'self'", "https://cdn.jsdelivr.net"],
+      styleSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com", "'unsafe-inline'"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:"],
       connectSrc: ["'self'"],
-      frameAncestors: ["'none'"],  // Anti-clickjacking renforcé
+      frameAncestors: ["'none'"],
     },
   },
   hsts: {
@@ -54,8 +43,6 @@ app.use(helmet({
   }
 }));
 
-// ── 2. Rate Limiting global ──────────────────────
-// OWASP A07 - Authentication Failures / brute force
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
@@ -65,25 +52,18 @@ const globalLimiter = rateLimit({
 });
 app.use(globalLimiter);
 
-// ── 3. Logging ───────────────────────────────────
 app.use(morgan('combined'));
 
-// ── 4. Parsers ───────────────────────────────────
 app.use(express.urlencoded({ extended: false, limit: '10kb' }));
 app.use(express.json({ limit: '10kb' }));
 
-// ── 5. Fichiers statiques ────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ── 6. Moteur de vues EJS ────────────────────────
-// EJS échappe automatiquement le HTML avec <%= %>
-// Ne jamais utiliser <%- pour des données utilisateur
-// OWASP A03 - XSS (Cross-site scripting)
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// ── 7. Sessions sécurisées ───────────────────────
-// OWASP A07 - Authentication Failures
+
 app.use(session({
   name: 'secureshop.sid',        // Nom personnalisé (pas 'connect.sid' par défaut)
   secret: SESSION_SECRET,
@@ -97,22 +77,15 @@ app.use(session({
   }
 }));
 
-// ── 8. Flash messages ────────────────────────────
 app.use(flash());
 
-// ── 9. Protection CSRF ───────────────────────────
-// OWASP A01 - Broken Access Control (CSRF)
-// Chaque formulaire POST doit inclure un token CSRF valide
-// généré côté serveur et vérifié à chaque soumission
 app.use(csrf());
 
-// Injecter le token CSRF dans toutes les vues EJS
 app.use((req, res, next) => {
   res.locals.csrfToken = req.csrfToken();
   next();
 });
 
-// Gestion des erreurs CSRF (token invalide ou absent)
 app.use((err, req, res, next) => {
   if (err.code === 'EBADCSRFTOKEN') {
     console.warn('[SECURITY] Token CSRF invalide :', req.ip, req.path);
@@ -125,16 +98,13 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-// ── 10. Injection des données utilisateur dans les vues ──
 app.use(injectUser);
 
-// ── 11. Routes ───────────────────────────────────
 app.get('/', (req, res) => res.redirect('/shop'));
-app.use('/auth',  authRoutes);
-app.use('/shop',  shopRoutes);
+app.use('/auth', authRoutes);
+app.use('/shop', shopRoutes);
 app.use('/admin', adminRoutes);
 
-// ── 12. 404 ──────────────────────────────────────
 app.use((req, res) => {
   res.status(404).render('error', {
     title: 'Erreur 404',
@@ -144,7 +114,6 @@ app.use((req, res) => {
   });
 });
 
-// ── 13. Gestionnaire d'erreurs global ────────────
 app.use((err, req, res, next) => {
   if (err.code === 'EBADCSRFTOKEN') {
     return res.status(403).render('error', {
@@ -163,7 +132,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ── Démarrage ────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`\n🔐 SecureShop démarré sur http://localhost:${PORT}`);
   console.log(`   Environnement : ${NODE_ENV}`);

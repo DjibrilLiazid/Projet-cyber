@@ -1,22 +1,13 @@
-// routes/auth.js
-// ================================================
-// OWASP A02 - Cryptographic Failures     → bcrypt pour les mots de passe
-// OWASP A07 - Authentication Failures    → rate limiting, verrouillage compte
-// OWASP A03 - Injection                  → requêtes préparées
-// OWASP A04 - Security Misconfiguration  → session sécurisée
-// ================================================
 
-const express  = require('express');
-const bcrypt   = require('bcrypt');
+const express = require('express');
+const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
 const rateLimit = require('express-rate-limit');
-const db       = require('../config/db');
-const router   = express.Router();
+const db = require('../config/db');
+const router = express.Router();
 
 const BCRYPT_ROUNDS = 12; // Coût suffisamment élevé pour ralentir le brute-force
 
-// Rate limiter spécifique aux routes d'authentification
-// OWASP A07 : limite les tentatives de connexion
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10,
@@ -29,13 +20,11 @@ const loginLimiter = rateLimit({
   }
 });
 
-// ── GET /auth/login ──────────────────────────────
 router.get('/login', (req, res) => {
   if (req.session.userId) return res.redirect('/shop');
   res.render('auth/login', { title: 'Connexion', csrfToken: req.csrfToken() });
 });
 
-// ── POST /auth/login ─────────────────────────────
 router.post('/login', loginLimiter, [
   body('email').isEmail().normalizeEmail().withMessage('Email invalide'),
   body('password').notEmpty().withMessage('Mot de passe requis'),
@@ -49,7 +38,6 @@ router.post('/login', loginLimiter, [
   const { email, password } = req.body;
 
   try {
-    // Requête préparée — jamais de concaténation directe (protection injection SQL)
     const [rows] = await db.execute(
       'SELECT * FROM users WHERE email = ? AND is_active = 1 LIMIT 1',
       [email]
@@ -63,7 +51,7 @@ router.post('/login', loginLimiter, [
       return res.redirect('/auth/login');
     }
 
-    // Comparaison bcrypt — résistant au timing attack
+    // Comparaison bcrypt 
     const validPassword = user ? await bcrypt.compare(password, user.password_hash) : false;
 
     if (!user || !validPassword) {
@@ -78,7 +66,6 @@ router.post('/login', loginLimiter, [
           [newAttempts, lockUntil, user.id]
         );
       }
-      // Message générique — ne révèle pas si l'email existe
       req.flash('error', 'Email ou mot de passe incorrect.');
       return res.redirect('/auth/login');
     }
@@ -92,9 +79,9 @@ router.post('/login', loginLimiter, [
     // Regénération de l'ID de session — protection contre la fixation de session
     req.session.regenerate((err) => {
       if (err) throw err;
-      req.session.userId   = user.id;
+      req.session.userId = user.id;
       req.session.username = user.username;
-      req.session.role     = user.role;
+      req.session.role = user.role;
       req.flash('success', `Bienvenue, ${user.username} !`);
       res.redirect(user.role === 'admin' ? '/admin' : '/shop');
     });
@@ -106,13 +93,11 @@ router.post('/login', loginLimiter, [
   }
 });
 
-// ── GET /auth/register ───────────────────────────
 router.get('/register', (req, res) => {
   if (req.session.userId) return res.redirect('/shop');
   res.render('auth/register', { title: 'Créer un compte', csrfToken: req.csrfToken() });
 });
 
-// ── POST /auth/register ──────────────────────────
 router.post('/register', [
   body('username')
     .trim()

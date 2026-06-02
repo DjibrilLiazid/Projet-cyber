@@ -1,6 +1,3 @@
-// config/db.js
-// SQLite via le package "sqlite3" — callback-based avec wrapper Promise
-// Aucune configuration requise, le fichier .db est créé automatiquement
 
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt  = require('bcrypt');
@@ -70,9 +67,6 @@ db.serialize(() => {
   });
 });
 
-// ── Adaptateur Promise compatible avec l'API mysql2 ──────────────────────────
-// Toutes les routes utilisent : await db.execute('SELECT ...', [params])
-// qui retourne [rows] pour SELECT, ou [{ insertId, affectedRows }] pour INSERT/UPDATE/DELETE
 
 const pool = {
   execute(sql, params = []) {
